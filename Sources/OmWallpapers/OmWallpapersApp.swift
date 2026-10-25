@@ -183,10 +183,11 @@ struct WallpaperCard: View {
     let wallpaper: Wallpaper
     @ObservedObject var store: LibraryStore
     @State private var hovered = false
+    @State private var resolution = "读取中"
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
             Button { Task { await store.apply(wallpaper) } } label: {
-                WallpaperImage(wallpaper: wallpaper)
+                WallpaperImage(wallpaper: wallpaper, onResolution: { resolution = $0 })
                     .frame(height: 122).frame(maxWidth: .infinity).clipped()
                     .overlay(alignment: .bottomLeading) {
                         if hovered { Label("设为壁纸", systemImage: "desktopcomputer").font(.caption.bold()).padding(8).foregroundStyle(.white).background(.black.opacity(0.85), in: Capsule()).padding(8) }
@@ -199,7 +200,13 @@ struct WallpaperCard: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(wallpaper.name).font(.system(size: 13, weight: .semibold)).lineLimit(1)
-                    Text(wallpaper.theme).font(.system(size: 12)).foregroundStyle(AppPalette.secondary).lineLimit(1)
+                    HStack(spacing: 6) {
+                        Text(wallpaper.theme).lineLimit(1)
+                        Spacer(minLength: 0)
+                        Text(resolution).monospacedDigit().fixedSize()
+                            .help("原图分辨率（像素）")
+                            .accessibilityLabel("原图分辨率：\(resolution)")
+                    }.font(.system(size: 12)).foregroundStyle(AppPalette.secondary)
                 }
                 Spacer(minLength: 4)
                 Button { store.toggleFavorite(wallpaper) } label: {
@@ -222,6 +229,7 @@ struct WallpaperCard: View {
 
 struct WallpaperImage: View {
     let wallpaper: Wallpaper
+    var onResolution: (String) -> Void = { _ in }
     @State private var image: NSImage?
     @State private var failed = false
     @State private var attempt = 0
@@ -238,8 +246,19 @@ struct WallpaperImage: View {
         }
         .task(id: "\(wallpaper.imageURL)-\(attempt)") {
             failed = false
-            do { image = try await ImageCache.shared.thumbnail(for: wallpaper) }
-            catch { failed = true }
+            image = nil
+            onResolution("读取中")
+            do {
+                let preview = try await ImageCache.shared.thumbnail(for: wallpaper)
+                try Task.checkCancellation()
+                image = preview.image
+                onResolution(preview.dimensions?.formatted ?? "分辨率未知")
+            } catch is CancellationError {
+                // A disappearing card will load again when it becomes visible.
+            } catch {
+                failed = true
+                onResolution("分辨率未知")
+            }
         }
     }
 }

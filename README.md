@@ -5,7 +5,7 @@
 ## 下载
 
 前往 [Releases](https://github.com/ismethr/omwallpapers/releases) 下载预览版。
-当前 `OmWallpapers-0.1.0-macos-x86_64.zip` 为 Intel 构建，要求 macOS 14+。
+当前 `OmWallpapers-0.1.1-macos-x86_64.zip` 为 Intel 构建，要求 macOS 14+。
 Apple Silicon 用户可从源码本机构建；本次未提供原生 Apple Silicon 二进制。
 
 下载后解压，把 `OmWallpapers.app` 拖入「应用程序」。当前采用 ad-hoc 签名，尚未经过 Apple 公证；如系统拦截，可在系统设置「隐私与安全性」中允许打开。
@@ -33,6 +33,7 @@ open dist/OmWallpapers.app
 - 「来源 → 发现社区主题」读取 https://omarchy.org/themes/ 的 GitHub 仓库链接；「同步全部」读取已收录仓库里的壁纸。
 - 支持粘贴 GitHub HTTPS 仓库地址（包含 `.git` 也可以）或 `owner/repository`。
 - 搜索壁纸、主题或作者；按主题筛选；收藏；随机更换。
+- 卡片主题名旁显示原图像素分辨率（如 `1672 × 941`），下载后读取图片元数据，支持 EXIF 旋转；读取失败显示「分辨率未知」。
 - 所有显示器一起换，或只换主显示器。
 - 每 15 分钟、每小时、每天自动切换，按当前筛选与收藏条件选择。
 - 登录启动；本地目录和收藏持久化；已下载图片离线可用。
@@ -72,5 +73,5 @@ SWIFTPM_MODULECACHE_OVERRIDE="$PWD/.build/ModuleCache" \
 - Debug / Release 编译通过，`.app` 的 plist 与 ad-hoc 签名校验通过。
 - 实际启动成功，持久化目录中有 101 张壁纸（Jade Horse 3 张、内置主题 98 张），未设置当前壁纸。
 - 官方社区网页解析到约 219 个仓库链接，目录会随上游更新变化。
-- 4 项 Swift Testing 测试通过：仓库输入校验、图片范围筛选、特殊字符 URL 和 commit 固定、版本更新后的收藏与持久化。
+- 5 项 Swift Testing 测试通过：仓库输入校验、图片范围筛选、特殊字符 URL 和 commit 固定、版本更新后的收藏与持久化，以及原图像素分辨率与 EXIF 旋转。
 - 设置桌面、多显示器、自动轮换和登录启动尚未完成交互验收；当前为预览版。
